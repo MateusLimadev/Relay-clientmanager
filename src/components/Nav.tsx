@@ -82,10 +82,10 @@ export default function Nav({ urgentCount }: { urgentCount: number }) {
         <div className="mt-2 border-t border-border-soft pt-[14px]">
           <div className="flex items-center gap-[9px] px-2 py-1.5">
             <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-border-soft text-[12px] font-bold text-text-secondary">
-              AD
+              GE
             </div>
             <div className="min-w-0">
-              <div className="text-[13px] font-semibold text-text">Administrador</div>
+              <div className="text-[13px] font-semibold text-text">Gestor</div>
               <div className="text-[11.5px] text-text-muted">Relay</div>
             </div>
           </div>
