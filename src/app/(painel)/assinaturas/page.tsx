@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAssinaturas, getClientes, getServidores } from "@/lib/data";
+import { getAssinaturasPageData } from "@/lib/data";
 import { buildCobrancaLink, formatDate, formatMoney } from "@/lib/format";
 import { PageHeader, Card, EmptyState, PrimaryLink, inputClass } from "@/components/ui";
 import StatusBadge from "@/components/StatusBadge";
@@ -20,11 +20,9 @@ export default async function AssinaturasPage({
   searchParams: Promise<Filtros>;
 }) {
   const filtros = await searchParams;
-  const [assinaturas, servidores, clientes] = await Promise.all([
-    getAssinaturas(filtros as Record<string, string>),
-    getServidores(),
-    getClientes(),
-  ]);
+  const { assinaturas, servidores, clientes } = await getAssinaturasPageData(
+    filtros as Record<string, string>
+  );
   const telefonePorCliente = new Map(clientes.map((c) => [c.id, c.telefone]));
 
   return (

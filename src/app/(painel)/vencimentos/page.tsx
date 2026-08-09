@@ -1,4 +1,4 @@
-import { getClientes, getVencimentos } from "@/lib/data";
+import { getVencimentosPageData } from "@/lib/data";
 import { buildCobrancaLink, formatDate, formatMoney } from "@/lib/format";
 import { PageHeader, Card, EmptyState } from "@/components/ui";
 import { registrarPagamentoAction } from "../assinaturas/actions";
@@ -79,7 +79,7 @@ function Secao({
 }
 
 export default async function VencimentosPage() {
-  const [venc, clientes] = await Promise.all([getVencimentos(), getClientes()]);
+  const { vencimentos: venc, clientes } = await getVencimentosPageData();
   const telefonePorCliente = new Map(clientes.map((c) => [c.id, c.telefone]));
 
   return (

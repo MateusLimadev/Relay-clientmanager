@@ -9,8 +9,8 @@ export default function PainelError({ error, reset }: { error: Error; reset: () 
       <Card className="max-w-xl" style={{ borderColor: "var(--danger-soft)" }}>
         <p className="text-[13.5px] text-text-value">{error.message}</p>
         <p className="mt-3 text-[13px] text-text-muted">
-          Confira se <code>SHEETS_API_URL</code> e <code>SHEETS_API_TOKEN</code> estão corretos no{" "}
-          <code>.env.local</code> e se o Apps Script foi publicado como Web App.
+          Confira se <code>DATABASE_URL</code> está correto no <code>.env.local</code> e se o banco
+          Supabase está acessível.
         </p>
         <button
           onClick={() => reset()}

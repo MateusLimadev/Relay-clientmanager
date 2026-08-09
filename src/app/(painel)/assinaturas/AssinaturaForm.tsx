@@ -1,10 +1,10 @@
 import { Card, inputClass, labelClass, SubmitButton } from "@/components/ui";
 import { salvarAssinatura } from "./actions";
-import { getClientes, getServidores } from "@/lib/data";
+import { getFormOptions } from "@/lib/data";
 import type { Assinatura } from "@/lib/types";
 
 export default async function AssinaturaForm({ assinatura }: { assinatura?: Assinatura }) {
-  const [clientes, servidores] = await Promise.all([getClientes(), getServidores()]);
+  const { clientes, servidores } = await getFormOptions();
 
   return (
     <Card className="max-w-2xl">

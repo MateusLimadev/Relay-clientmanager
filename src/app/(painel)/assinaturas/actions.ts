@@ -2,11 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { callGas } from "@/lib/gas-client";
+import {
+  cancelarAssinatura,
+  excluirAssinatura,
+  registrarPagamento,
+  upsertAssinatura,
+} from "@/lib/mutations";
 
 export async function salvarAssinatura(formData: FormData) {
   const id = formData.get("id");
-  await callGas("upsertAssinatura", {
+  await upsertAssinatura({
     id: typeof id === "string" && id ? id : undefined,
     clienteId: formData.get("clienteId"),
     servidorId: formData.get("servidorId"),
@@ -25,8 +30,8 @@ export async function salvarAssinatura(formData: FormData) {
 }
 
 export async function cancelarAssinaturaAction(formData: FormData) {
-  const id = formData.get("id");
-  await callGas("cancelarAssinatura", { id });
+  const id = String(formData.get("id"));
+  await cancelarAssinatura(id);
   revalidatePath("/assinaturas");
   revalidatePath("/");
   revalidatePath("/vencimentos");
@@ -34,8 +39,8 @@ export async function cancelarAssinaturaAction(formData: FormData) {
 }
 
 export async function excluirAssinaturaAction(formData: FormData) {
-  const id = formData.get("id");
-  await callGas("excluirAssinatura", { id });
+  const id = String(formData.get("id"));
+  await excluirAssinatura(id);
   revalidatePath("/assinaturas");
   revalidatePath("/");
   revalidatePath("/vencimentos");
@@ -45,7 +50,7 @@ export async function excluirAssinaturaAction(formData: FormData) {
 export async function registrarPagamentoAction(formData: FormData) {
   const id = formData.get("id");
   const redirectTo = formData.get("redirectTo");
-  await callGas("registrarPagamento", { assinaturaId: id });
+  await registrarPagamento({ assinaturaId: id });
   revalidatePath("/assinaturas");
   revalidatePath("/");
   revalidatePath("/vencimentos");

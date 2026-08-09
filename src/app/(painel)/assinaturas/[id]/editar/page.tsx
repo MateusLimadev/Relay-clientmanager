@@ -1,15 +1,14 @@
 import { notFound } from "next/navigation";
-import { getAssinatura } from "@/lib/data";
+import { getAssinatura, NotFoundError } from "@/lib/data";
 import { PageHeader } from "@/components/ui";
 import AssinaturaForm from "../../AssinaturaForm";
-import { GasError } from "@/lib/gas-client";
 import type { Assinatura } from "@/lib/types";
 
 async function carregarAssinatura(id: string): Promise<Assinatura> {
   try {
     return await getAssinatura(id);
   } catch (err) {
-    if (err instanceof GasError) notFound();
+    if (err instanceof NotFoundError) notFound();
     throw err;
   }
 }

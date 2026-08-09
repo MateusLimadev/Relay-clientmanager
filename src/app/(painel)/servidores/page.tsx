@@ -1,4 +1,4 @@
-import { getAssinaturas, getServidores } from "@/lib/data";
+import { getServidoresPageData } from "@/lib/data";
 import { PageHeader, Card, EmptyState, PrimaryLink } from "@/components/ui";
 import ConfirmButton from "@/components/ConfirmButton";
 import ServidorStatusBadge from "@/components/ServidorStatusBadge";
@@ -10,9 +10,8 @@ export default async function ServidoresPage({
 }: {
   searchParams: Promise<{ erro?: string }>;
 }) {
-  const [servidores, assinaturas, { erro }] = await Promise.all([
-    getServidores(),
-    getAssinaturas(),
+  const [{ servidores, assinaturas }, { erro }] = await Promise.all([
+    getServidoresPageData(),
     searchParams,
   ]);
 

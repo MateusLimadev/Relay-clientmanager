@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { callGas } from "@/lib/gas-client";
+import { deleteServidor, upsertServidor } from "@/lib/mutations";
 
 export async function salvarServidor(formData: FormData) {
   const id = formData.get("id");
-  await callGas("upsertServidor", {
+  await upsertServidor({
     id: typeof id === "string" && id ? id : undefined,
     nome: formData.get("nome"),
     status: formData.get("status"),
@@ -16,9 +16,9 @@ export async function salvarServidor(formData: FormData) {
 }
 
 export async function excluirServidor(formData: FormData) {
-  const id = formData.get("id");
+  const id = String(formData.get("id"));
   try {
-    await callGas("deleteServidor", { id });
+    await deleteServidor(id);
   } catch (err) {
     const mensagem = err instanceof Error ? err.message : "Não foi possível excluir.";
     redirect(`/servidores?erro=${encodeURIComponent(mensagem)}`);
