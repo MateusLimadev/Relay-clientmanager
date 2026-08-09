@@ -8,5 +8,9 @@ if (!connectionString) {
   throw new Error("DATABASE_URL não configurado. Preencha o .env.local.");
 }
 
-const queryClient = postgres(connectionString, { prepare: false });
+const queryClient = postgres(connectionString, {
+  prepare: false,
+  ssl: "require",
+  connect_timeout: 10,
+});
 export const db = drizzle(queryClient, { schema });
