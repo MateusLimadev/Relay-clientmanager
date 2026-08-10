@@ -1,7 +1,10 @@
 import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { assinaturas, clientes, pagamentos, servidores } from "@/lib/db/schema";
+import { assinaturas, clientes, pagamentos, servidores, settings } from "@/lib/db/schema";
+
+/** Linha única de configurações do painel — sempre esse id fixo. */
+export const SETTINGS_ID = "default";
 import { calcularDashboard, calcularVencimentos, enrichAssinatura, todayStr } from "@/lib/domain";
 import type {
   Assinatura,
@@ -100,6 +103,11 @@ export async function getPagamentos(assinaturaId?: string): Promise<Pagamento[]>
     ? await query.where(eq(pagamentos.assinaturaId, assinaturaId))
     : await query;
   return rows.sort((a, b) => (b.data || "").localeCompare(a.data || ""));
+}
+
+export async function getSettings(): Promise<{ cobrancaAutomaticaAtiva: boolean }> {
+  const [row] = await db.select().from(settings).where(eq(settings.id, SETTINGS_ID));
+  return { cobrancaAutomaticaAtiva: row?.cobrancaAutomaticaAtiva ?? false };
 }
 
 export async function getPagamentosCliente(clienteId: string): Promise<PagamentoCliente[]> {

@@ -13,6 +13,7 @@ import {
   IconVencimentos,
   IconClientes,
   IconServidores,
+  IconConfiguracoes,
   IconDots,
 } from "@/components/icons";
 
@@ -77,6 +78,17 @@ export default function Nav({ urgentCount }: { urgentCount: number }) {
             <IconServidores size={18} />
             Servidores
           </Link>
+          <Link
+            href="/configuracoes"
+            className="flex items-center gap-[11px] rounded-[9px] px-3 py-2.5 text-[14px] font-semibold"
+            style={{
+              background: isActive(pathname, "/configuracoes") ? "var(--accent-soft)" : "transparent",
+              color: isActive(pathname, "/configuracoes") ? "var(--accent)" : "var(--text-secondary)",
+            }}
+          >
+            <IconConfiguracoes size={18} />
+            Configurações
+          </Link>
         </nav>
 
         <div className="mt-2 border-t border-border-soft pt-[14px]">
@@ -134,7 +146,12 @@ export default function Nav({ urgentCount }: { urgentCount: number }) {
         <button
           type="button"
           onClick={() => setMoreOpen(true)}
-          style={{ color: isActive(pathname, "/servidores") ? "var(--accent)" : "var(--text-secondary)" }}
+          style={{
+            color:
+              isActive(pathname, "/servidores") || isActive(pathname, "/configuracoes")
+                ? "var(--accent)"
+                : "var(--text-secondary)",
+          }}
           className="flex min-w-[48px] flex-col items-center gap-[3px] p-1 text-[10.5px] font-semibold"
         >
           <IconDots size={19} />
@@ -160,6 +177,14 @@ export default function Nav({ urgentCount }: { urgentCount: number }) {
             >
               <IconServidores size={19} />
               Servidores
+            </Link>
+            <Link
+              href="/configuracoes"
+              onClick={() => setMoreOpen(false)}
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[14.5px] font-semibold text-text"
+            >
+              <IconConfiguracoes size={19} />
+              Configurações
             </Link>
             <form action={logout}>
               <button

@@ -2,8 +2,9 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { assinaturas, clientes, pagamentos, servidores } from "@/lib/db/schema";
+import { assinaturas, clientes, cobrancasPix, pagamentos, servidores, settings } from "@/lib/db/schema";
 import { addDays, todayStr } from "@/lib/domain";
+import { SETTINGS_ID } from "@/lib/data";
 import type { StatusServidor } from "@/lib/types";
 
 function requireFields(obj: Record<string, unknown>, fields: string[]) {
@@ -178,4 +179,35 @@ export async function registrarPagamento(input: { assinaturaId: unknown; data?: 
     .where(eq(assinaturas.id, assinatura.id))
     .returning();
   return row;
+}
+
+/**
+ * Chamado pelo webhook do Banco Inter quando um Pix é confirmado. Marca a
+ * cobrança como paga e reaproveita registrarPagamento() — a mesma lógica que
+ * o botão manual "Registrar pagamento" já usa.
+ */
+export async function confirmarCobrancaPix(txid: string) {
+  const [cobranca] = await db.select().from(cobrancasPix).where(eq(cobrancasPix.txid, txid));
+  if (!cobranca) return { ok: false as const, motivo: "Cobrança não encontrada." };
+  if (cobranca.status === "paid") return { ok: true as const, jaProcessada: true };
+
+  await db
+    .update(cobrancasPix)
+    .set({ status: "paid", pagoEm: new Date().toISOString() })
+    .where(eq(cobrancasPix.id, cobranca.id));
+
+  await registrarPagamento({ assinaturaId: cobranca.assinaturaId, valor: cobranca.valor });
+  return { ok: true as const, jaProcessada: false };
+}
+
+// ---------- Configurações ----------
+
+export async function atualizarSettings(input: { cobrancaAutomaticaAtiva: boolean }) {
+  await db
+    .insert(settings)
+    .values({ id: SETTINGS_ID, cobrancaAutomaticaAtiva: input.cobrancaAutomaticaAtiva })
+    .onConflictDoUpdate({
+      target: settings.id,
+      set: { cobrancaAutomaticaAtiva: input.cobrancaAutomaticaAtiva },
+    });
 }

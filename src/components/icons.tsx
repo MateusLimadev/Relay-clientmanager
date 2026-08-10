@@ -2,6 +2,15 @@ type IconProps = { size?: number; className?: string };
 
 const base = { fill: "none", stroke: "currentColor", strokeWidth: 1.7 } as const;
 
+export function IconConfiguracoes({ size = 18, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" className={className} {...base}>
+      <circle cx="10" cy="10" r="2.6" />
+      <path d="M10 2.7v2.1M10 15.2v2.1M17.3 10h-2.1M4.8 10H2.7M15.2 4.8l-1.5 1.5M6.3 13.7l-1.5 1.5M15.2 15.2l-1.5-1.5M6.3 6.3L4.8 4.8" />
+    </svg>
+  );
+}
+
 export function IconDashboard({ size = 18, className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" className={className} {...base}>

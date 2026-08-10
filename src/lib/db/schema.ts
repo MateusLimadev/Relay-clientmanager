@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, numeric, date, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, numeric, date, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const servidores = pgTable("servidores", {
   id: uuid("id").primaryKey(),
@@ -46,4 +46,25 @@ export const pagamentos = pgTable("pagamentos", {
   data: date("data", { mode: "string" }).notNull(),
   valor: numeric("valor", { precision: 10, scale: 2, mode: "number" }).notNull(),
   criadoEm: timestamp("criado_em", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+});
+
+/** Linha única (id fixo "default") com os interruptores gerais do painel. */
+export const settings = pgTable("settings", {
+  id: text("id").primaryKey(),
+  cobrancaAutomaticaAtiva: boolean("cobranca_automatica_ativa").notNull().default(false),
+});
+
+export const cobrancasPix = pgTable("cobrancas_pix", {
+  id: uuid("id").primaryKey(),
+  assinaturaId: uuid("assinatura_id")
+    .notNull()
+    .references(() => assinaturas.id, { onDelete: "cascade" }),
+  txid: text("txid").notNull(),
+  valor: numeric("valor", { precision: 10, scale: 2, mode: "number" }).notNull(),
+  status: text("status", { enum: ["pending", "paid", "expired", "cancelled"] })
+    .notNull()
+    .default("pending"),
+  copiaECola: text("copia_e_cola").notNull(),
+  criadoEm: timestamp("criado_em", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  pagoEm: timestamp("pago_em", { withTimezone: true, mode: "string" }),
 });
