@@ -27,8 +27,9 @@ function Secao({
       ) : (
         <div className="flex flex-col gap-2">
           {itens.map((a) => {
+            const telefone = telefonePorCliente.get(a.clienteId) ?? "";
             const cobrarLink = buildCobrancaLink(
-              telefonePorCliente.get(a.clienteId) ?? "",
+              telefone,
               a.clienteNome,
               a.servidorNome,
               a.vencimento,
@@ -43,7 +44,7 @@ function Secao({
                 <div className="min-w-[160px]">
                   <div className="text-[14px] font-bold text-text">{a.clienteNome}</div>
                   <div className="text-xs text-text-secondary">
-                    {a.servidorNome} · vence {formatDate(a.vencimento)}
+                    {telefone || "sem telefone"} · {a.servidorNome} · vence {formatDate(a.vencimento)}
                   </div>
                 </div>
                 <div className="text-[14px] font-semibold text-text">{formatMoney(a.valorCliente)}</div>
