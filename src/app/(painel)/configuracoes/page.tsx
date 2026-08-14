@@ -23,7 +23,7 @@ export default async function ConfiguracoesPage() {
               <span className="font-semibold">Cobrança automática por WhatsApp</span>
               <p className="mt-1 text-[13px] text-text-secondary">
                 Todo dia, no vencimento de cada assinatura ativa, o sistema gera uma cobrança Pix na sua
-                conta do Banco Inter e manda a mensagem pelo WhatsApp automaticamente. Quando o cliente
+                conta do Mercado Pago e manda a mensagem pelo WhatsApp automaticamente. Quando o cliente
                 pagar, o pagamento é registrado sozinho no painel — sem precisar clicar em nada.
               </p>
             </label>

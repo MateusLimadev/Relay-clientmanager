@@ -5,7 +5,7 @@ import { db } from "@/lib/db/client";
 import { cobrancasPix } from "@/lib/db/schema";
 import { getAssinaturas, getClientes, getSettings } from "@/lib/data";
 import { todayStr } from "@/lib/domain";
-import { criarCobrancaPix } from "@/lib/bancointer";
+import { criarCobrancaPix } from "@/lib/mercadopago";
 import { enviarTemplateCobranca } from "@/lib/whatsapp";
 import { formatMoney } from "@/lib/format";
 
@@ -53,7 +53,7 @@ export async function executarCobrancaDiaria(): Promise<ResultadoCobrancaDiaria>
       await db.insert(cobrancasPix).values({
         id: randomUUID(),
         assinaturaId: assinatura.id,
-        txid: cobranca.txid,
+        txid: cobranca.id,
         valor: assinatura.valorCliente,
         status: "pending",
         copiaECola: cobranca.copiaECola,

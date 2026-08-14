@@ -71,9 +71,9 @@ Acesse [http://localhost:3000](http://localhost:3000) e entre com a
 
 Com isso configurado, todo dia (`vercel.json` roda um cron às 12:00 UTC) o
 sistema confere as assinaturas ativas que vencem hoje, gera uma cobrança Pix
-na conta do Banco Inter e manda a mensagem pelo WhatsApp sozinho. Quando o
-cliente paga, o webhook do Inter avisa o painel e o pagamento é registrado
-automaticamente — sem precisar clicar em nada.
+na conta do Mercado Pago e manda a mensagem pelo WhatsApp sozinho. Quando o
+cliente paga, o webhook do Mercado Pago avisa o painel e o pagamento é
+registrado automaticamente — sem precisar clicar em nada.
 
 **Fica desligado por padrão.** Mesmo com tudo configurado, nada dispara até
 você ligar o interruptor em **Configurações** dentro do painel — só ative
@@ -81,24 +81,22 @@ depois de conferir que os vencimentos da base estão corretos, senão a
 primeira rodada pode cobrar assinaturas que já deveriam ter vencido há
 tempo.
 
-### Banco Inter
+### Mercado Pago
 
-1. Acesse o [Internet Banking Inter PJ](https://intergov.bancointer.com.br)
-   e crie credenciais de API em **Conta Digital > API**, com escopo de Pix
-   (`cob.write`, `cob.read`, `webhook.write`, `pix.write`, `pix.read`).
-2. Gere o certificado mTLS no mesmo painel e baixe o `.crt` e a `.key`.
-   Converta cada um pra base64 numa linha só e cole em `BANCOINTER_CERT`/
-   `BANCOINTER_KEY`:
-   ```bash
-   base64 -w0 Inter_API_Certificado.crt
-   base64 -w0 Inter_API_Chave.key
-   ```
-3. Preencha `BANCOINTER_CLIENT_ID`, `BANCOINTER_CLIENT_SECRET` e
-   `BANCOINTER_PIX_KEY` (a chave Pix cadastrada na conta que vai receber).
-4. Registre a URL do webhook na API do Inter (`PUT /pix/v2/webhook/{sua-chave-pix}`)
-   apontando para `https://SEU-DOMINIO/api/webhooks/bancointer/SEU_BANCOINTER_WEBHOOK_SECRET`
-   — o segredo na própria URL é a autenticação, já que o Inter não assina o
-   corpo da notificação.
+1. Crie/entre na conta [Mercado Pago](https://www.mercadopago.com.br) (aceita
+   CPF/MEI, não precisa CNPJ PJ como o Banco Inter).
+2. Acesse [mercadopago.com.br/developers/panel](https://www.mercadopago.com.br/developers/panel)
+   e crie uma aplicação — em "Com qual API você vai integrar?" escolha
+   **API de Pagamentos** (não a API de Orders: só precisamos de uma
+   transação por solicitação).
+3. Na aba de **credenciais de produção**, copie o `Access Token`
+   (`APP_USR-...`) pra `MERCADOPAGO_ACCESS_TOKEN`.
+4. Cadastre a URL do webhook em Developers > sua aplicação > **Webhooks**:
+   `https://SEU-DOMINIO/api/webhooks/mercadopago`, assinando o evento
+   `payment`. O painel gera uma **assinatura secreta** nesse momento — copie
+   pra `MERCADOPAGO_WEBHOOK_SECRET` (usada pra validar o header
+   `x-signature` das notificações, já que o Mercado Pago assina o corpo em
+   vez de embutir o segredo na URL como o Inter faz).
 
 ### WhatsApp Cloud API (Meta)
 
@@ -114,11 +112,11 @@ tempo.
    pode levar de minutos a alguns dias. Preencha `WHATSAPP_TEMPLATE_NAME`
    com o nome exato do template (padrão: `cobranca_vencimento`).
 
-### Cron e webhook na Vercel
+### Cron na Vercel
 
-Gere `CRON_SECRET` e `BANCOINTER_WEBHOOK_SECRET` com `openssl rand -base64 32`
-e adicione, junto com todas as variáveis acima, nas **Environment Variables**
-do projeto na Vercel — o `vercel.json` já declara o cron, a Vercel injeta o
+Gere `CRON_SECRET` com `openssl rand -base64 32` e adicione, junto com
+todas as variáveis acima, nas **Environment Variables** do projeto na
+Vercel — o `vercel.json` já declara o cron, a Vercel injeta o
 `CRON_SECRET` sozinha nas chamadas.
 
 ## Estrutura do painel

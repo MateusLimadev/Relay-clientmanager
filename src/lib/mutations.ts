@@ -182,7 +182,7 @@ export async function registrarPagamento(input: { assinaturaId: unknown; data?: 
 }
 
 /**
- * Chamado pelo webhook do Banco Inter quando um Pix é confirmado. Marca a
+ * Chamado pelo webhook do Mercado Pago quando um Pix é confirmado. Marca a
  * cobrança como paga e reaproveita registrarPagamento() — a mesma lógica que
  * o botão manual "Registrar pagamento" já usa.
  */
