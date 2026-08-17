@@ -6,7 +6,7 @@ const PUBLIC_ROUTES = ["/login"];
 // Rotas que têm autenticação própria (segredo de cron, assinatura de
 // webhook) em vez de cookie de sessão — sempre passam direto pelo proxy, a
 // própria rota decide se aceita a chamada ou não.
-const SELF_AUTHENTICATED_PREFIXES = ["/api/cron/", "/api/webhooks/", "/api/debug-mercadopago"];
+const SELF_AUTHENTICATED_PREFIXES = ["/api/cron/", "/api/webhooks/"];
 
 async function isAuthenticated(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get("session")?.value;
