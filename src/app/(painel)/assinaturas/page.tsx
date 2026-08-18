@@ -86,6 +86,7 @@ export default async function AssinaturasPage({
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted">Cliente</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted">Servidor</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted">Login</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted">Vencimento</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted">Status</th>
                   <th className="px-4 py-3 text-right text-xs font-semibold text-text-muted">Valor</th>
@@ -105,6 +106,7 @@ export default async function AssinaturasPage({
                     <tr key={a.id} className="group border-t border-border-soft transition-colors hover:bg-border-soft/50">
                       <td className="px-4 py-3 font-semibold text-text">{a.clienteNome}</td>
                       <td className="px-4 py-3 text-text-secondary">{a.servidorNome}</td>
+                      <td className="px-4 py-3 font-mono text-text-secondary">{a.login}</td>
                       <td className="px-4 py-3 text-text-value">{formatDate(a.vencimento)}</td>
                       <td className="px-4 py-3">
                         <StatusBadge status={a.status} />
@@ -183,7 +185,8 @@ export default async function AssinaturasPage({
                     <div>
                       <div className="text-[14.5px] font-bold text-text">{a.clienteNome}</div>
                       <div className="text-[12.5px] text-text-secondary">
-                        {a.servidorNome} · vence {formatDate(a.vencimento)}
+                        {a.servidorNome} · login <span className="font-mono">{a.login}</span> · vence{" "}
+                        {formatDate(a.vencimento)}
                       </div>
                     </div>
                     <StatusBadge status={a.status} />
