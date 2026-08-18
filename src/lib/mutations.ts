@@ -147,19 +147,33 @@ export async function excluirAssinatura(id: string) {
   await db.delete(assinaturas).where(eq(assinaturas.id, id));
 }
 
-/** Registra um pagamento: empurra o vencimento pelo prazo da assinatura. */
-export async function registrarPagamento(input: { assinaturaId: unknown; data?: unknown; valor?: unknown }) {
+/**
+ * Registra um pagamento: por padrão empurra o vencimento pelo prazo da
+ * assinatura, mas aceita um `vencimento` explícito (ex.: cliente pagou um
+ * período diferente do prazo padrão) que substitui esse cálculo.
+ */
+export async function registrarPagamento(input: {
+  assinaturaId: unknown;
+  data?: unknown;
+  valor?: unknown;
+  vencimento?: unknown;
+}) {
   requireFields(input, ["assinaturaId"]);
   const assinaturaId = String(input.assinaturaId);
   const [assinatura] = await db.select().from(assinaturas).where(eq(assinaturas.id, assinaturaId));
   if (!assinatura) throw new Error(`Assinatura não encontrada: ${assinaturaId}`);
 
   const dataPagamento = input.data ? String(input.data) : todayStr();
-  const baseParaVencimento =
-    assinatura.vencimento && assinatura.vencimento > dataPagamento
-      ? assinatura.vencimento
-      : dataPagamento;
-  const novoVencimento = addDays(baseParaVencimento, Number(assinatura.prazoDias) || 30);
+  let novoVencimento: string;
+  if (input.vencimento) {
+    novoVencimento = String(input.vencimento);
+  } else {
+    const baseParaVencimento =
+      assinatura.vencimento && assinatura.vencimento > dataPagamento
+        ? assinatura.vencimento
+        : dataPagamento;
+    novoVencimento = addDays(baseParaVencimento, Number(assinatura.prazoDias) || 30);
+  }
   const valor = input.valor !== undefined ? Number(input.valor) : Number(assinatura.valorCliente) || 0;
 
   await db.insert(pagamentos).values({

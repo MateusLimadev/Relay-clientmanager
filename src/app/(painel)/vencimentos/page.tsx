@@ -1,8 +1,9 @@
 import { getVencimentosPageData } from "@/lib/data";
 import { buildMensagemCobrancaGrupo, formatDate, formatMoney } from "@/lib/format";
+import { sugerirProximoVencimento, todayStr } from "@/lib/domain";
 import { PageHeader, Card, EmptyState, inputClass } from "@/components/ui";
 import CobrarModal from "@/components/CobrarModal";
-import ConfirmButton from "@/components/ConfirmButton";
+import RegistrarPagamentoModal from "@/components/RegistrarPagamentoModal";
 import { registrarPagamentoAction } from "../assinaturas/actions";
 import type { Assinatura } from "@/lib/types";
 
@@ -50,6 +51,7 @@ function Secao({
   telefonePorCliente: Map<string, string>;
 }) {
   const grupos = agruparPorCliente(itens, telefonePorCliente);
+  const hoje = todayStr();
 
   return (
     <div className="mb-8">
@@ -110,16 +112,17 @@ function Secao({
                             ])}
                             compact
                           />
-                          <form action={registrarPagamentoAction}>
-                            <input type="hidden" name="id" value={a.id} />
-                            <input type="hidden" name="redirectTo" value="/vencimentos" />
-                            <ConfirmButton
-                              confirmMessage={`Registrar pagamento de ${g.clienteNome} — ${a.servidorNome} (login ${a.login}), ${formatMoney(a.valorCliente)}?`}
-                              className="cursor-pointer text-[12.5px] font-bold text-success"
-                            >
-                              Registrar pagamento
-                            </ConfirmButton>
-                          </form>
+                          <RegistrarPagamentoModal
+                            assinaturaId={a.id}
+                            clienteNome={g.clienteNome}
+                            servidorNome={a.servidorNome}
+                            login={a.login}
+                            valorCliente={formatMoney(a.valorCliente)}
+                            vencimentoSugerido={sugerirProximoVencimento(a, hoje)}
+                            redirectTo="/vencimentos"
+                            action={registrarPagamentoAction}
+                            compact
+                          />
                         </div>
                       </div>
                     </div>

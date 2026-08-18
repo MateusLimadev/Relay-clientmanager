@@ -50,7 +50,11 @@ export async function excluirAssinaturaAction(formData: FormData) {
 export async function registrarPagamentoAction(formData: FormData) {
   const id = formData.get("id");
   const redirectTo = formData.get("redirectTo");
-  await registrarPagamento({ assinaturaId: id });
+  const vencimento = formData.get("vencimento");
+  await registrarPagamento({
+    assinaturaId: id,
+    vencimento: typeof vencimento === "string" && vencimento ? vencimento : undefined,
+  });
   revalidatePath("/assinaturas");
   revalidatePath("/");
   revalidatePath("/vencimentos");

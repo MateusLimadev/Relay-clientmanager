@@ -19,6 +19,17 @@ export function round2(n: number): number {
   return Math.round((Number(n) || 0) * 100) / 100;
 }
 
+/**
+ * Mesma conta que registrarPagamento() usa por padrão — serve só pra sugerir
+ * uma data inicial no modal de "Pagou", que o usuário pode editar antes de
+ * confirmar.
+ */
+export function sugerirProximoVencimento(assinatura: { vencimento: string; prazoDias: number }, hoje: string): string {
+  const baseParaVencimento =
+    assinatura.vencimento && assinatura.vencimento > hoje ? assinatura.vencimento : hoje;
+  return addDays(baseParaVencimento, Number(assinatura.prazoDias) || 30);
+}
+
 export function computeStatus(
   assinatura: { statusManual: string; vencimento: string },
   hoje: string

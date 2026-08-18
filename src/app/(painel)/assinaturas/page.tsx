@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { getAssinaturasPageData } from "@/lib/data";
 import { buildCobrancaLink, formatDate, formatMoney } from "@/lib/format";
+import { sugerirProximoVencimento, todayStr } from "@/lib/domain";
 import { PageHeader, Card, EmptyState, PrimaryLink, inputClass } from "@/components/ui";
 import StatusBadge from "@/components/StatusBadge";
 import ConfirmButton from "@/components/ConfirmButton";
+import RegistrarPagamentoModal from "@/components/RegistrarPagamentoModal";
 import { cancelarAssinaturaAction, excluirAssinaturaAction, registrarPagamentoAction } from "./actions";
 import type { StatusAssinatura } from "@/lib/types";
 
@@ -24,6 +26,7 @@ export default async function AssinaturasPage({
     filtros as Record<string, string>
   );
   const telefonePorCliente = new Map(clientes.map((c) => [c.id, c.telefone]));
+  const hoje = todayStr();
 
   return (
     <div>
@@ -114,16 +117,18 @@ export default async function AssinaturasPage({
                       <td className="px-4 py-3 text-right font-semibold text-text">{formatMoney(a.valorCliente)}</td>
                       <td className="px-4 py-3 text-right whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                         {(a.status === "ativa" || a.status === "vencida") && (
-                          <form action={registrarPagamentoAction} className="inline">
-                            <input type="hidden" name="id" value={a.id} />
-                            <input type="hidden" name="redirectTo" value="/assinaturas" />
-                            <ConfirmButton
-                              confirmMessage={`Registrar pagamento de ${a.clienteNome} — ${a.servidorNome}, ${formatMoney(a.valorCliente)}?`}
-                              className="ml-2.5 cursor-pointer text-[13px] font-semibold text-success"
-                            >
-                              Pagou
-                            </ConfirmButton>
-                          </form>
+                          <span className="ml-2.5">
+                            <RegistrarPagamentoModal
+                              assinaturaId={a.id}
+                              clienteNome={a.clienteNome}
+                              servidorNome={a.servidorNome}
+                              login={a.login}
+                              valorCliente={formatMoney(a.valorCliente)}
+                              vencimentoSugerido={sugerirProximoVencimento(a, hoje)}
+                              redirectTo="/assinaturas"
+                              action={registrarPagamentoAction}
+                            />
+                          </span>
                         )}
                         {cobrarLink && (
                           <a
@@ -195,16 +200,16 @@ export default async function AssinaturasPage({
                     <div className="text-[15px] font-bold text-text">{formatMoney(a.valorCliente)}</div>
                     <div className="flex gap-3.5">
                       {(a.status === "ativa" || a.status === "vencida") && (
-                        <form action={registrarPagamentoAction}>
-                          <input type="hidden" name="id" value={a.id} />
-                          <input type="hidden" name="redirectTo" value="/assinaturas" />
-                          <ConfirmButton
-                            confirmMessage={`Registrar pagamento de ${a.clienteNome} — ${a.servidorNome}, ${formatMoney(a.valorCliente)}?`}
-                            className="text-[13px] font-semibold text-success"
-                          >
-                            Pagou
-                          </ConfirmButton>
-                        </form>
+                        <RegistrarPagamentoModal
+                          assinaturaId={a.id}
+                          clienteNome={a.clienteNome}
+                          servidorNome={a.servidorNome}
+                          login={a.login}
+                          valorCliente={formatMoney(a.valorCliente)}
+                          vencimentoSugerido={sugerirProximoVencimento(a, hoje)}
+                          redirectTo="/assinaturas"
+                          action={registrarPagamentoAction}
+                        />
                       )}
                       {cobrarLink && (
                         <a href={cobrarLink} target="_blank" rel="noreferrer" className="text-[13px] font-semibold text-accent">
