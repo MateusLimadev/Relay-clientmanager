@@ -69,11 +69,16 @@ export async function getAssinaturas(
   if (filtro.clienteId) rows = rows.filter((a) => a.clienteId === filtro.clienteId);
   if (filtro.busca) {
     const termo = filtro.busca.toLowerCase();
+    const termoDigits = termo.replace(/\D/g, "");
+    const clientesList = await db.select({ id: clientes.id, telefone: clientes.telefone }).from(clientes);
+    const telefonePorCliente = new Map(clientesList.map((c) => [c.id, c.telefone]));
     rows = rows.filter(
       (a) =>
         a.clienteNome.toLowerCase().includes(termo) ||
         a.login.toLowerCase().includes(termo) ||
-        a.servidorNome.toLowerCase().includes(termo)
+        a.servidorNome.toLowerCase().includes(termo) ||
+        (termoDigits.length > 0 &&
+          (telefonePorCliente.get(a.clienteId) ?? "").replace(/\D/g, "").includes(termoDigits))
     );
   }
 

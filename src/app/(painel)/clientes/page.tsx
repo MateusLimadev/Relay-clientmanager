@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getClientes } from "@/lib/data";
-import { PageHeader, Card, EmptyState, PrimaryLink } from "@/components/ui";
+import { PageHeader, Card, EmptyState, PrimaryLink, inputClass } from "@/components/ui";
 import ConfirmButton from "@/components/ConfirmButton";
 import HistoricoModal from "@/components/HistoricoModal";
 import { excluirCliente } from "./actions";
@@ -8,15 +8,25 @@ import { excluirCliente } from "./actions";
 export default async function ClientesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ erro?: string }>;
+  searchParams: Promise<{ erro?: string; busca?: string }>;
 }) {
-  const [clientes, { erro }] = await Promise.all([getClientes(), searchParams]);
+  const [todosClientes, { erro, busca }] = await Promise.all([getClientes(), searchParams]);
+
+  const termo = (busca ?? "").trim().toLowerCase();
+  const termoDigits = termo.replace(/\D/g, "");
+  const clientes = termo
+    ? todosClientes.filter(
+        (c) =>
+          c.nome.toLowerCase().includes(termo) ||
+          (termoDigits.length > 0 && c.telefone.replace(/\D/g, "").includes(termoDigits))
+      )
+    : todosClientes;
 
   return (
     <div>
       <PageHeader
         title="Clientes"
-        subtitle={`${clientes.length} clientes cadastrados`}
+        subtitle={`${clientes.length} de ${todosClientes.length} clientes`}
         action={<PrimaryLink href="/clientes/novo">+ Novo cliente</PrimaryLink>}
       />
 
@@ -24,8 +34,26 @@ export default async function ClientesPage({
         <p className="mb-4 rounded-[10px] bg-[var(--danger-soft)] px-4 py-3 text-[13.5px] text-danger">{erro}</p>
       )}
 
+      <Card className="mb-4">
+        <form method="get" className="flex gap-2.5">
+          <input
+            type="text"
+            name="busca"
+            defaultValue={busca}
+            placeholder="Buscar por nome ou telefone…"
+            className={`${inputClass} flex-1`}
+          />
+          <button
+            type="submit"
+            className="rounded-[10px] border border-border px-5 py-2.5 text-[13.5px] font-semibold text-text hover:bg-border-soft"
+          >
+            Buscar
+          </button>
+        </form>
+      </Card>
+
       {clientes.length === 0 ? (
-        <EmptyState message="Nenhum cliente cadastrado ainda." />
+        <EmptyState message="Nenhum cliente encontrado." />
       ) : (
         <>
           {/* Tabela — desktop */}

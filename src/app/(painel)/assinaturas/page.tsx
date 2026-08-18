@@ -39,7 +39,7 @@ export default async function AssinaturasPage({
             type="text"
             name="busca"
             defaultValue={filtros.busca}
-            placeholder="Buscar cliente, login, servidor…"
+            placeholder="Buscar por nome, telefone, login, servidor…"
             className={`${inputClass} md:col-span-2`}
           />
           <select name="status" defaultValue={filtros.status ?? ""} className={inputClass}>

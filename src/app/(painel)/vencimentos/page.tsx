@@ -1,6 +1,6 @@
 import { getVencimentosPageData } from "@/lib/data";
 import { buildCobrancaLink, formatDate, formatMoney } from "@/lib/format";
-import { PageHeader, Card, EmptyState } from "@/components/ui";
+import { PageHeader, Card, EmptyState, inputClass } from "@/components/ui";
 import { registrarPagamentoAction } from "../assinaturas/actions";
 import type { Assinatura } from "@/lib/types";
 
@@ -79,31 +79,69 @@ function Secao({
   );
 }
 
-export default async function VencimentosPage() {
-  const { vencimentos: venc, clientes } = await getVencimentosPageData();
+export default async function VencimentosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ busca?: string }>;
+}) {
+  const [{ vencimentos: venc, clientes }, { busca }] = await Promise.all([
+    getVencimentosPageData(),
+    searchParams,
+  ]);
   const telefonePorCliente = new Map(clientes.map((c) => [c.id, c.telefone]));
+
+  const termo = (busca ?? "").trim().toLowerCase();
+  const termoDigits = termo.replace(/\D/g, "");
+  const filtra = (itens: Assinatura[]) =>
+    termo
+      ? itens.filter(
+          (a) =>
+            a.clienteNome.toLowerCase().includes(termo) ||
+            (termoDigits.length > 0 &&
+              (telefonePorCliente.get(a.clienteId) ?? "").replace(/\D/g, "").includes(termoDigits))
+        )
+      : itens;
 
   return (
     <div>
       <PageHeader title="Vencimentos" subtitle="Quem venceu, vence hoje ou vence nos próximos 7 dias" />
+
+      <Card className="mb-4">
+        <form method="get" className="flex gap-2.5">
+          <input
+            type="text"
+            name="busca"
+            defaultValue={busca}
+            placeholder="Buscar por nome ou telefone…"
+            className={`${inputClass} flex-1`}
+          />
+          <button
+            type="submit"
+            className="rounded-[10px] border border-border px-5 py-2.5 text-[13.5px] font-semibold text-text hover:bg-border-soft"
+          >
+            Buscar
+          </button>
+        </form>
+      </Card>
+
       <Secao
         titulo="Vencidas"
         color="var(--danger)"
         borderColor="var(--danger)"
-        itens={venc.vencidas}
+        itens={filtra(venc.vencidas)}
         telefonePorCliente={telefonePorCliente}
       />
       <Secao
         titulo="Vencem hoje"
         color="var(--warning)"
         borderColor="var(--warning)"
-        itens={venc.hoje}
+        itens={filtra(venc.hoje)}
         telefonePorCliente={telefonePorCliente}
       />
       <Secao
         titulo="Próximos 7 dias"
         color="var(--text-value)"
-        itens={venc.proximos7dias}
+        itens={filtra(venc.proximos7dias)}
         telefonePorCliente={telefonePorCliente}
       />
     </div>
