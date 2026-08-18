@@ -97,6 +97,14 @@ function Secao({
                       </div>
                       <div className="flex items-center gap-2.5">
                         <span className="font-semibold text-text">{formatMoney(a.valorCliente)}</span>
+                        <CobrarModal
+                          clienteNome={g.clienteNome}
+                          telefone={g.telefone}
+                          mensagemPadrao={buildMensagemCobrancaGrupo(g.clienteNome, [
+                            { servidor: a.servidorNome, login: a.login, vencimento: a.vencimento, valor: a.valorCliente },
+                          ])}
+                          compact
+                        />
                         <form action={registrarPagamentoAction}>
                           <input type="hidden" name="id" value={a.id} />
                           <input type="hidden" name="redirectTo" value="/vencimentos" />

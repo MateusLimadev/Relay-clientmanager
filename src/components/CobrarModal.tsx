@@ -8,10 +8,12 @@ export default function CobrarModal({
   clienteNome,
   telefone,
   mensagemPadrao,
+  compact = false,
 }: {
   clienteNome: string;
   telefone: string;
   mensagemPadrao: string;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [mensagem, setMensagem] = useState(mensagemPadrao);
@@ -26,7 +28,11 @@ export default function CobrarModal({
           setMensagem(mensagemPadrao);
           setOpen(true);
         }}
-        className="rounded-lg bg-accent px-3.5 py-[7px] text-[12.5px] font-bold text-accent-foreground"
+        className={
+          compact
+            ? "text-[12.5px] font-bold text-accent"
+            : "rounded-lg bg-accent px-3.5 py-[7px] text-[12.5px] font-bold text-accent-foreground"
+        }
       >
         Cobrar
       </button>
