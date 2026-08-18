@@ -53,3 +53,28 @@ export function buildCobrancaLink(
   )} no valor de ${formatMoney(valor)}. Podemos renovar?`;
   return buildWhatsAppLink(telefone, mensagem);
 }
+
+export type ItemCobranca = { servidor: string; login: string; vencimento: string; valor: number };
+
+/**
+ * Mensagem única cobrindo todas as assinaturas vencidas/a vencer de um
+ * mesmo cliente — evita mandar uma mensagem por login quando ele tem
+ * várias assinaturas no mesmo servidor ou em servidores diferentes.
+ */
+export function buildMensagemCobrancaGrupo(nomeCliente: string, itens: ItemCobranca[]): string {
+  const nome = String(nomeCliente ?? "").trim();
+  const primeiroNome = nome.split(/\s+/)[0] || nome;
+  const linhas = itens.map(
+    (i) => `- ${i.servidor} (login ${i.login}): ${formatMoney(i.valor)}, vence ${formatDate(i.vencimento)}`
+  );
+  const total = itens.reduce((soma, i) => soma + (Number(i.valor) || 0), 0);
+  const plural = itens.length > 1;
+  return [
+    `Olá ${primeiroNome}, ${plural ? `você tem ${itens.length} assinaturas vencendo` : "sua assinatura vence"}:`,
+    ...linhas,
+    plural ? `Total: ${formatMoney(total)}` : "",
+    "Podemos renovar?",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}

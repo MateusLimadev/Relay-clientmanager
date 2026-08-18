@@ -1,8 +1,39 @@
 import { getVencimentosPageData } from "@/lib/data";
-import { buildCobrancaLink, formatDate, formatMoney } from "@/lib/format";
+import { buildMensagemCobrancaGrupo, formatDate, formatMoney } from "@/lib/format";
 import { PageHeader, Card, EmptyState, inputClass } from "@/components/ui";
+import CobrarModal from "@/components/CobrarModal";
 import { registrarPagamentoAction } from "../assinaturas/actions";
 import type { Assinatura } from "@/lib/types";
+
+type GrupoCliente = {
+  clienteId: string;
+  clienteNome: string;
+  telefone: string;
+  itens: Assinatura[];
+  total: number;
+};
+
+function agruparPorCliente(itens: Assinatura[], telefonePorCliente: Map<string, string>): GrupoCliente[] {
+  const porCliente = new Map<string, GrupoCliente>();
+  for (const a of itens) {
+    let grupo = porCliente.get(a.clienteId);
+    if (!grupo) {
+      grupo = {
+        clienteId: a.clienteId,
+        clienteNome: a.clienteNome,
+        telefone: telefonePorCliente.get(a.clienteId) ?? "",
+        itens: [],
+        total: 0,
+      };
+      porCliente.set(a.clienteId, grupo);
+    }
+    grupo.itens.push(a);
+    grupo.total += Number(a.valorCliente) || 0;
+  }
+  return Array.from(porCliente.values()).sort((x, y) =>
+    (x.itens[0]?.vencimento || "").localeCompare(y.itens[0]?.vencimento || "")
+  );
+}
 
 function Secao({
   titulo,
@@ -17,58 +48,65 @@ function Secao({
   itens: Assinatura[];
   telefonePorCliente: Map<string, string>;
 }) {
+  const grupos = agruparPorCliente(itens, telefonePorCliente);
+
   return (
     <div className="mb-8">
       <h2 style={{ color }} className="mb-2.5 text-[14.5px] font-bold">
         {titulo} ({itens.length})
       </h2>
-      {itens.length === 0 ? (
+      {grupos.length === 0 ? (
         <EmptyState message="Nada por aqui." />
       ) : (
         <div className="flex flex-col gap-2">
-          {itens.map((a) => {
-            const telefone = telefonePorCliente.get(a.clienteId) ?? "";
-            const cobrarLink = buildCobrancaLink(
-              telefone,
-              a.clienteNome,
-              a.servidorNome,
-              a.vencimento,
-              a.valorCliente
+          {grupos.map((g) => {
+            const mensagem = buildMensagemCobrancaGrupo(
+              g.clienteNome,
+              g.itens.map((a) => ({
+                servidor: a.servidorNome,
+                login: a.login,
+                vencimento: a.vencimento,
+                valor: a.valorCliente,
+              }))
             );
             return (
               <Card
-                key={a.id}
+                key={g.clienteId}
                 style={borderColor ? { borderLeft: `3px solid ${borderColor}` } : undefined}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-[13px]"
+                className="rounded-xl px-4 py-[13px]"
               >
-                <div className="min-w-[160px]">
-                  <div className="text-[14px] font-bold text-text">{a.clienteNome}</div>
-                  <div className="text-xs text-text-secondary">
-                    {telefone || "sem telefone"} · {a.servidorNome} · vence {formatDate(a.vencimento)}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-[160px]">
+                    <div className="text-[14px] font-bold text-text">{g.clienteNome}</div>
+                    <div className="text-xs text-text-secondary">{g.telefone || "sem telefone"}</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {g.itens.length > 1 && (
+                      <div className="text-[14px] font-semibold text-text">Total {formatMoney(g.total)}</div>
+                    )}
+                    <CobrarModal clienteNome={g.clienteNome} telefone={g.telefone} mensagemPadrao={mensagem} />
                   </div>
                 </div>
-                <div className="text-[14px] font-semibold text-text">{formatMoney(a.valorCliente)}</div>
-                <div className="flex gap-2.5">
-                  {cobrarLink && (
-                    <a
-                      href={cobrarLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[13px] font-semibold text-accent"
-                    >
-                      Cobrar
-                    </a>
-                  )}
-                  <form action={registrarPagamentoAction}>
-                    <input type="hidden" name="id" value={a.id} />
-                    <input type="hidden" name="redirectTo" value="/vencimentos" />
-                    <button
-                      type="submit"
-                      className="rounded-lg bg-success px-3.5 py-[7px] text-[12.5px] font-bold text-accent-foreground"
-                    >
-                      Registrar pagamento
-                    </button>
-                  </form>
+
+                <div className="mt-2.5 flex flex-col gap-1.5 border-t border-border-soft pt-2.5">
+                  {g.itens.map((a) => (
+                    <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+                      <div className="text-text-secondary">
+                        {a.servidorNome} · login <span className="font-mono text-text">{a.login}</span> · vence{" "}
+                        {formatDate(a.vencimento)}
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <span className="font-semibold text-text">{formatMoney(a.valorCliente)}</span>
+                        <form action={registrarPagamentoAction}>
+                          <input type="hidden" name="id" value={a.id} />
+                          <input type="hidden" name="redirectTo" value="/vencimentos" />
+                          <button type="submit" className="text-[12.5px] font-bold text-success">
+                            Registrar pagamento
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </Card>
             );
