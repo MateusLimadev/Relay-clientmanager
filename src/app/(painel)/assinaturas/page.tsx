@@ -102,7 +102,7 @@ export default async function AssinaturasPage({
                     a.valorCliente
                   );
                   return (
-                    <tr key={a.id} className="border-t border-border-soft">
+                    <tr key={a.id} className="group border-t border-border-soft transition-colors hover:bg-border-soft/50">
                       <td className="px-4 py-3 font-semibold text-text">{a.clienteNome}</td>
                       <td className="px-4 py-3 text-text-secondary">{a.servidorNome}</td>
                       <td className="px-4 py-3 text-text-value">{formatDate(a.vencimento)}</td>
@@ -110,25 +110,33 @@ export default async function AssinaturasPage({
                         <StatusBadge status={a.status} />
                       </td>
                       <td className="px-4 py-3 text-right font-semibold text-text">{formatMoney(a.valorCliente)}</td>
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <td className="px-4 py-3 text-right whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                         {(a.status === "ativa" || a.status === "vencida") && (
                           <form action={registrarPagamentoAction} className="inline">
                             <input type="hidden" name="id" value={a.id} />
                             <input type="hidden" name="redirectTo" value="/assinaturas" />
                             <ConfirmButton
                               confirmMessage={`Registrar pagamento de ${a.clienteNome} — ${a.servidorNome}, ${formatMoney(a.valorCliente)}?`}
-                              className="ml-2.5 text-[13px] font-semibold text-success"
+                              className="ml-2.5 cursor-pointer text-[13px] font-semibold text-success"
                             >
                               Pagou
                             </ConfirmButton>
                           </form>
                         )}
                         {cobrarLink && (
-                          <a href={cobrarLink} target="_blank" rel="noreferrer" className="ml-2.5 text-[13px] font-semibold text-accent">
+                          <a
+                            href={cobrarLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="ml-2.5 cursor-pointer text-[13px] font-semibold text-accent"
+                          >
                             Cobrar
                           </a>
                         )}
-                        <Link href={`/assinaturas/${a.id}/editar`} className="ml-2.5 text-[13px] font-semibold text-text-secondary">
+                        <Link
+                          href={`/assinaturas/${a.id}/editar`}
+                          className="ml-2.5 cursor-pointer text-[13px] font-semibold text-text-secondary"
+                        >
                           Editar
                         </Link>
                         {a.status !== "cancelada" && (
@@ -136,7 +144,7 @@ export default async function AssinaturasPage({
                             <input type="hidden" name="id" value={a.id} />
                             <ConfirmButton
                               confirmMessage={`Cancelar a assinatura de ${a.clienteNome}?`}
-                              className="ml-2.5 text-[13px] font-semibold text-warning"
+                              className="ml-2.5 cursor-pointer text-[13px] font-semibold text-warning"
                             >
                               Cancelar
                             </ConfirmButton>
@@ -146,7 +154,7 @@ export default async function AssinaturasPage({
                           <input type="hidden" name="id" value={a.id} />
                           <ConfirmButton
                             confirmMessage={`Excluir definitivamente a assinatura de ${a.clienteNome}? Isso também apaga o histórico de pagamentos dela.`}
-                            className="ml-2.5 text-[13px] font-semibold text-danger"
+                            className="ml-2.5 cursor-pointer text-[13px] font-semibold text-danger"
                           >
                             Excluir
                           </ConfirmButton>

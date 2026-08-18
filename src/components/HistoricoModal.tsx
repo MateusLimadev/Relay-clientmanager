@@ -36,7 +36,11 @@ export default function HistoricoModal({ clienteId, clienteNome }: { clienteId: 
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="text-[13px] font-semibold text-accent">
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="cursor-pointer text-[13px] font-semibold text-accent"
+      >
         Histórico
       </button>
 

@@ -39,7 +39,7 @@ export default async function ServidoresPage({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {servidores.map((s) => (
-            <Card key={s.id}>
+            <Card key={s.id} className="group transition-colors hover:bg-border-soft/50">
               <div className="mb-3 flex items-start justify-between">
                 <div className="text-[15px] font-bold text-text">{s.nome}</div>
                 <ServidorStatusBadge status={s.status} />
@@ -47,15 +47,18 @@ export default async function ServidoresPage({
               <div className="mb-3.5 text-[12.5px] text-text-secondary">
                 {ativasPorServidor.get(s.id) ?? 0} assinaturas ativas
               </div>
-              <div className="flex gap-3.5 border-t border-border-soft pt-2.5">
-                <Link href={`/servidores/${s.id}/editar`} className="text-[13px] font-semibold text-text-secondary">
+              <div className="flex gap-3.5 border-t border-border-soft pt-2.5 md:opacity-0 md:transition-opacity md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+                <Link
+                  href={`/servidores/${s.id}/editar`}
+                  className="cursor-pointer text-[13px] font-semibold text-text-secondary"
+                >
                   Editar
                 </Link>
                 <form action={excluirServidor} className="inline">
                   <input type="hidden" name="id" value={s.id} />
                   <ConfirmButton
                     confirmMessage={`Excluir o servidor "${s.nome}"?`}
-                    className="text-[13px] font-semibold text-danger"
+                    className="cursor-pointer text-[13px] font-semibold text-danger"
                   >
                     Excluir
                   </ConfirmButton>

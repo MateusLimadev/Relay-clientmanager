@@ -69,26 +69,29 @@ export default async function ClientesPage({
               </thead>
               <tbody>
                 {clientes.map((c) => (
-                  <tr key={c.id} className="border-t border-border-soft">
+                  <tr key={c.id} className="group border-t border-border-soft transition-colors hover:bg-border-soft/50">
                     <td className="px-4 py-3 font-semibold text-text">{c.nome}</td>
                     <td className="px-4 py-3 text-text-secondary">{c.telefone || "—"}</td>
                     <td className="px-4 py-3 text-right text-text-value">
-                      <Link href={`/assinaturas?clienteId=${c.id}`} className="font-semibold text-accent">
+                      <Link href={`/assinaturas?clienteId=${c.id}`} className="cursor-pointer font-semibold text-accent">
                         {c.totalAssinaturas ?? 0}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <td className="px-4 py-3 text-right whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                       <span className="ml-2.5">
                         <HistoricoModal clienteId={c.id} clienteNome={c.nome} />
                       </span>
-                      <Link href={`/clientes/${c.id}/editar`} className="ml-2.5 text-[13px] font-semibold text-text-secondary">
+                      <Link
+                        href={`/clientes/${c.id}/editar`}
+                        className="ml-2.5 cursor-pointer text-[13px] font-semibold text-text-secondary"
+                      >
                         Editar
                       </Link>
                       <form action={excluirCliente} className="inline">
                         <input type="hidden" name="id" value={c.id} />
                         <ConfirmButton
                           confirmMessage={`Excluir o cliente "${c.nome}"?`}
-                          className="ml-2.5 text-[13px] font-semibold text-danger"
+                          className="ml-2.5 cursor-pointer text-[13px] font-semibold text-danger"
                         >
                           Excluir
                         </ConfirmButton>

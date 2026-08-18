@@ -91,31 +91,36 @@ function Secao({
 
                 <div className="mt-2.5 flex flex-col gap-1.5 border-t border-border-soft pt-2.5">
                   {g.itens.map((a) => (
-                    <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+                    <div
+                      key={a.id}
+                      className="group/item -mx-2 flex flex-wrap items-center justify-between gap-2 rounded-lg px-2 py-1 text-[13px] transition-colors hover:bg-border-soft/50"
+                    >
                       <div className="text-text-secondary">
                         {a.servidorNome} · login <span className="font-mono text-text">{a.login}</span> · vence{" "}
                         {formatDate(a.vencimento)}
                       </div>
                       <div className="flex items-center gap-2.5">
                         <span className="font-semibold text-text">{formatMoney(a.valorCliente)}</span>
-                        <CobrarModal
-                          clienteNome={g.clienteNome}
-                          telefone={g.telefone}
-                          mensagemPadrao={buildMensagemCobrancaGrupo(g.clienteNome, [
-                            { servidor: a.servidorNome, login: a.login, vencimento: a.vencimento, valor: a.valorCliente },
-                          ])}
-                          compact
-                        />
-                        <form action={registrarPagamentoAction}>
-                          <input type="hidden" name="id" value={a.id} />
-                          <input type="hidden" name="redirectTo" value="/vencimentos" />
-                          <ConfirmButton
-                            confirmMessage={`Registrar pagamento de ${g.clienteNome} — ${a.servidorNome} (login ${a.login}), ${formatMoney(a.valorCliente)}?`}
-                            className="text-[12.5px] font-bold text-success"
-                          >
-                            Registrar pagamento
-                          </ConfirmButton>
-                        </form>
+                        <div className="flex items-center gap-2.5 md:opacity-0 md:transition-opacity md:group-hover/item:opacity-100 md:group-focus-within/item:opacity-100">
+                          <CobrarModal
+                            clienteNome={g.clienteNome}
+                            telefone={g.telefone}
+                            mensagemPadrao={buildMensagemCobrancaGrupo(g.clienteNome, [
+                              { servidor: a.servidorNome, login: a.login, vencimento: a.vencimento, valor: a.valorCliente },
+                            ])}
+                            compact
+                          />
+                          <form action={registrarPagamentoAction}>
+                            <input type="hidden" name="id" value={a.id} />
+                            <input type="hidden" name="redirectTo" value="/vencimentos" />
+                            <ConfirmButton
+                              confirmMessage={`Registrar pagamento de ${g.clienteNome} — ${a.servidorNome} (login ${a.login}), ${formatMoney(a.valorCliente)}?`}
+                              className="cursor-pointer text-[12.5px] font-bold text-success"
+                            >
+                              Registrar pagamento
+                            </ConfirmButton>
+                          </form>
+                        </div>
                       </div>
                     </div>
                   ))}

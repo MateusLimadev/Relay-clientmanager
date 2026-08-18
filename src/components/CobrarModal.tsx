@@ -30,8 +30,8 @@ export default function CobrarModal({
         }}
         className={
           compact
-            ? "text-[12.5px] font-bold text-accent"
-            : "rounded-lg bg-accent px-3.5 py-[7px] text-[12.5px] font-bold text-accent-foreground"
+            ? "cursor-pointer text-[12.5px] font-bold text-accent"
+            : "cursor-pointer rounded-lg bg-accent px-3.5 py-[7px] text-[12.5px] font-bold text-accent-foreground"
         }
       >
         Cobrar
@@ -57,7 +57,7 @@ export default function CobrarModal({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Fechar"
-                className="text-xl leading-none text-text-secondary"
+                className="cursor-pointer text-xl leading-none text-text-secondary"
               >
                 ×
               </button>
@@ -77,7 +77,7 @@ export default function CobrarModal({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-[10px] border border-border px-4 py-2.5 text-[13.5px] font-semibold text-text hover:bg-border-soft"
+                className="cursor-pointer rounded-[10px] border border-border px-4 py-2.5 text-[13.5px] font-semibold text-text hover:bg-border-soft"
               >
                 Cancelar
               </button>
@@ -93,7 +93,7 @@ export default function CobrarModal({
                     }
                     setOpen(false);
                   }}
-                  className="rounded-[10px] bg-accent px-5 py-2.5 text-[13.5px] font-bold text-accent-foreground transition-opacity hover:opacity-90"
+                  className="cursor-pointer rounded-[10px] bg-accent px-5 py-2.5 text-[13.5px] font-bold text-accent-foreground transition-opacity hover:opacity-90"
                 >
                   Abrir WhatsApp
                 </a>
