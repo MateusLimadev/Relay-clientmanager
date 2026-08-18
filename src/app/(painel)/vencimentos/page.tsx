@@ -2,6 +2,7 @@ import { getVencimentosPageData } from "@/lib/data";
 import { buildMensagemCobrancaGrupo, formatDate, formatMoney } from "@/lib/format";
 import { PageHeader, Card, EmptyState, inputClass } from "@/components/ui";
 import CobrarModal from "@/components/CobrarModal";
+import ConfirmButton from "@/components/ConfirmButton";
 import { registrarPagamentoAction } from "../assinaturas/actions";
 import type { Assinatura } from "@/lib/types";
 
@@ -108,9 +109,12 @@ function Secao({
                         <form action={registrarPagamentoAction}>
                           <input type="hidden" name="id" value={a.id} />
                           <input type="hidden" name="redirectTo" value="/vencimentos" />
-                          <button type="submit" className="text-[12.5px] font-bold text-success">
+                          <ConfirmButton
+                            confirmMessage={`Registrar pagamento de ${g.clienteNome} — ${a.servidorNome} (login ${a.login}), ${formatMoney(a.valorCliente)}?`}
+                            className="text-[12.5px] font-bold text-success"
+                          >
                             Registrar pagamento
-                          </button>
+                          </ConfirmButton>
                         </form>
                       </div>
                     </div>

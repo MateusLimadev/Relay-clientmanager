@@ -115,9 +115,12 @@ export default async function AssinaturasPage({
                           <form action={registrarPagamentoAction} className="inline">
                             <input type="hidden" name="id" value={a.id} />
                             <input type="hidden" name="redirectTo" value="/assinaturas" />
-                            <button type="submit" className="ml-2.5 text-[13px] font-semibold text-success">
+                            <ConfirmButton
+                              confirmMessage={`Registrar pagamento de ${a.clienteNome} — ${a.servidorNome}, ${formatMoney(a.valorCliente)}?`}
+                              className="ml-2.5 text-[13px] font-semibold text-success"
+                            >
                               Pagou
-                            </button>
+                            </ConfirmButton>
                           </form>
                         )}
                         {cobrarLink && (
@@ -184,9 +187,12 @@ export default async function AssinaturasPage({
                         <form action={registrarPagamentoAction}>
                           <input type="hidden" name="id" value={a.id} />
                           <input type="hidden" name="redirectTo" value="/assinaturas" />
-                          <button type="submit" className="text-[13px] font-semibold text-success">
+                          <ConfirmButton
+                            confirmMessage={`Registrar pagamento de ${a.clienteNome} — ${a.servidorNome}, ${formatMoney(a.valorCliente)}?`}
+                            className="text-[13px] font-semibold text-success"
+                          >
                             Pagou
-                          </button>
+                          </ConfirmButton>
                         </form>
                       )}
                       {cobrarLink && (

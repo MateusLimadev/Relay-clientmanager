@@ -86,7 +86,13 @@ export default function CobrarModal({
                   href={link}
                   target="_blank"
                   rel="noreferrer"
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => {
+                    if (!window.confirm(`Abrir o WhatsApp e mandar essa mensagem pra ${clienteNome}?`)) {
+                      e.preventDefault();
+                      return;
+                    }
+                    setOpen(false);
+                  }}
                   className="rounded-[10px] bg-accent px-5 py-2.5 text-[13.5px] font-bold text-accent-foreground transition-opacity hover:opacity-90"
                 >
                   Abrir WhatsApp
