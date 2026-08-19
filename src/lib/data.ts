@@ -1,7 +1,7 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { assinaturas, clientes, pagamentos, servidores, settings } from "@/lib/db/schema";
+import { assinaturas, clientes, cobrancasPix, pagamentos, servidores, settings } from "@/lib/db/schema";
 
 /** Linha única de configurações do painel — sempre esse id fixo. */
 export const SETTINGS_ID = "default";
@@ -9,7 +9,9 @@ import { calcularDashboard, calcularVencimentos, enrichAssinatura, todayStr } fr
 import type {
   Assinatura,
   Cliente,
+  CobrancaPendente,
   Dashboard,
+  HistoricoPagamento,
   Pagamento,
   PagamentoCliente,
   Servidor,
@@ -132,6 +134,83 @@ export async function getPagamentosCliente(clienteId: string): Promise<Pagamento
   return rows
     .map((r) => ({ ...r, servidorNome: r.servidorNome ?? "" }))
     .sort((a, b) => (b.data || "").localeCompare(a.data || ""));
+}
+
+/**
+ * Junta os pagamentos por assinatura (tabela `pagamentos`, já existente —
+ * cobre tanto "Registrar pagamento" manual quanto cobranças Pix por
+ * assinatura confirmadas) com pedidos personalizados pagos (que não têm
+ * assinatura, então só existem em `cobrancasPix`).
+ */
+export async function getHistoricoPagamentos(): Promise<HistoricoPagamento[]> {
+  const [porAssinatura, personalizados] = await Promise.all([
+    db
+      .select({
+        id: pagamentos.id,
+        data: pagamentos.data,
+        valor: pagamentos.valor,
+        clienteNome: clientes.nome,
+        servidorNome: servidores.nome,
+        login: assinaturas.login,
+      })
+      .from(pagamentos)
+      .innerJoin(assinaturas, eq(pagamentos.assinaturaId, assinaturas.id))
+      .innerJoin(clientes, eq(assinaturas.clienteId, clientes.id))
+      .leftJoin(servidores, eq(assinaturas.servidorId, servidores.id)),
+    db
+      .select({
+        id: cobrancasPix.id,
+        pagoEm: cobrancasPix.pagoEm,
+        valor: cobrancasPix.valor,
+        descricao: cobrancasPix.descricao,
+        clienteNome: clientes.nome,
+      })
+      .from(cobrancasPix)
+      .leftJoin(clientes, eq(cobrancasPix.clienteId, clientes.id))
+      .where(eq(cobrancasPix.tipo, "personalizado")),
+  ]);
+
+  const linhasAssinatura: HistoricoPagamento[] = porAssinatura.map((r) => ({
+    id: r.id,
+    data: r.data,
+    valor: Number(r.valor) || 0,
+    clienteNome: r.clienteNome,
+    origem: "assinatura",
+    detalhe: `${r.servidorNome ?? ""} · login ${r.login}`,
+  }));
+
+  const linhasPersonalizadas: HistoricoPagamento[] = personalizados
+    .filter((r) => r.pagoEm)
+    .map((r) => ({
+      id: r.id,
+      data: (r.pagoEm ?? "").slice(0, 10),
+      valor: Number(r.valor) || 0,
+      clienteNome: r.clienteNome ?? "(sem cliente)",
+      origem: "personalizado",
+      detalhe: r.descricao,
+    }));
+
+  return [...linhasAssinatura, ...linhasPersonalizadas].sort((a, b) => b.data.localeCompare(a.data));
+}
+
+export async function getCobrancasPendentes(): Promise<CobrancaPendente[]> {
+  const rows = await db
+    .select({
+      id: cobrancasPix.id,
+      tipo: cobrancasPix.tipo,
+      clienteNome: clientes.nome,
+      descricao: cobrancasPix.descricao,
+      valor: cobrancasPix.valor,
+      copiaECola: cobrancasPix.copiaECola,
+      ticketUrl: cobrancasPix.ticketUrl,
+      criadoEm: cobrancasPix.criadoEm,
+    })
+    .from(cobrancasPix)
+    .leftJoin(clientes, eq(cobrancasPix.clienteId, clientes.id))
+    .where(eq(cobrancasPix.status, "pending"))
+    .orderBy(desc(cobrancasPix.criadoEm));
+
+  return rows.map((r) => ({ ...r, valor: Number(r.valor) || 0, clienteNome: r.clienteNome ?? "(sem cliente)" }));
 }
 
 // Endpoints "consolidados": mantidos pelo mesmo nome/formato de antes (quando

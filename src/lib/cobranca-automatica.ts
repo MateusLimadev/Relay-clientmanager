@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { cobrancasPix } from "@/lib/db/schema";
 import { getAssinaturas, getClientes, getSettings } from "@/lib/data";
@@ -40,7 +40,12 @@ export async function executarCobrancaDiaria(): Promise<ResultadoCobrancaDiaria>
       const [existente] = await db
         .select({ id: cobrancasPix.id })
         .from(cobrancasPix)
-        .where(and(eq(cobrancasPix.assinaturaId, assinatura.id), eq(cobrancasPix.status, "pending")))
+        .where(
+          and(
+            eq(cobrancasPix.status, "pending"),
+            sql`EXISTS (SELECT 1 FROM jsonb_array_elements(${cobrancasPix.itens}) it WHERE it->>'assinaturaId' = ${assinatura.id})`
+          )
+        )
         .limit(1);
       if (existente) continue; // já tem cobrança pendente pra essa assinatura
 
@@ -52,11 +57,21 @@ export async function executarCobrancaDiaria(): Promise<ResultadoCobrancaDiaria>
 
       await db.insert(cobrancasPix).values({
         id: randomUUID(),
-        assinaturaId: assinatura.id,
+        tipo: "assinatura",
+        clienteId: assinatura.clienteId,
+        itens: [
+          {
+            assinaturaId: assinatura.id,
+            servidorNome: assinatura.servidorNome,
+            login: assinatura.login,
+            valor: assinatura.valorCliente,
+          },
+        ],
         txid: cobranca.id,
         valor: assinatura.valorCliente,
         status: "pending",
         copiaECola: cobranca.copiaECola,
+        ticketUrl: cobranca.ticketUrl,
       });
 
       const envio = await enviarTemplateCobranca(telefonePorCliente.get(assinatura.clienteId), {

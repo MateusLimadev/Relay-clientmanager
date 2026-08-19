@@ -1,9 +1,11 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { assinaturas, clientes, cobrancasPix, pagamentos, servidores, settings } from "@/lib/db/schema";
-import { addDays, todayStr } from "@/lib/domain";
+import type { ItemCobrancaPix } from "@/lib/db/schema";
+import { addDays, round2, todayStr } from "@/lib/domain";
+import { criarCobrancaPix } from "@/lib/mercadopago";
 import { SETTINGS_ID } from "@/lib/data";
 import type { StatusServidor } from "@/lib/types";
 
@@ -196,9 +198,112 @@ export async function registrarPagamento(input: {
 }
 
 /**
+ * Cria uma cobrança Pix cobrindo uma ou várias assinaturas de um mesmo
+ * cliente (ex.: cliente com vários logins vencidos, cobrados numa tacada só
+ * pelo botão "Cobrar"). Usada tanto pro cliente inteiro quanto por login.
+ */
+export async function criarCobrancaParaAssinaturas(assinaturaIds: string[]) {
+  if (!assinaturaIds.length) throw new Error("Nenhuma assinatura selecionada.");
+
+  const linhas = await db
+    .select({
+      id: assinaturas.id,
+      clienteId: assinaturas.clienteId,
+      login: assinaturas.login,
+      valorCliente: assinaturas.valorCliente,
+      servidorNome: servidores.nome,
+      clienteNome: clientes.nome,
+    })
+    .from(assinaturas)
+    .innerJoin(servidores, eq(assinaturas.servidorId, servidores.id))
+    .innerJoin(clientes, eq(assinaturas.clienteId, clientes.id))
+    .where(inArray(assinaturas.id, assinaturaIds));
+
+  if (!linhas.length) throw new Error("Assinaturas não encontradas.");
+  const clienteId = linhas[0].clienteId;
+  const clienteNome = linhas[0].clienteNome;
+
+  const itens: ItemCobrancaPix[] = linhas.map((l) => ({
+    assinaturaId: l.id,
+    servidorNome: l.servidorNome,
+    login: l.login,
+    valor: Number(l.valorCliente) || 0,
+  }));
+  const valorTotal = round2(itens.reduce((soma, i) => soma + i.valor, 0));
+  const descricao =
+    itens.length === 1
+      ? `Assinatura ${itens[0].servidorNome} — ${clienteNome}`
+      : `${itens.length} assinaturas — ${clienteNome}`;
+
+  const cobranca = await criarCobrancaPix({
+    valor: valorTotal,
+    descricao,
+    referenciaExterna: `${clienteId}-${randomUUID().slice(0, 8)}`,
+  });
+
+  const [row] = await db
+    .insert(cobrancasPix)
+    .values({
+      id: randomUUID(),
+      tipo: "assinatura",
+      clienteId,
+      itens,
+      descricao,
+      txid: cobranca.id,
+      valor: valorTotal,
+      status: "pending",
+      copiaECola: cobranca.copiaECola,
+      ticketUrl: cobranca.ticketUrl,
+    })
+    .returning();
+  return row;
+}
+
+/**
+ * Cobrança avulsa: valor livre digitado pelo gestor, sem estar ligada a
+ * nenhuma assinatura — pra quando ele quer só copiar o link e mandar manual.
+ */
+export async function criarPedidoPersonalizado(input: {
+  clienteId?: unknown;
+  valor: unknown;
+  descricao?: unknown;
+}) {
+  requireFields(input, ["valor"]);
+  const valor = round2(Number(input.valor));
+  if (!(valor > 0)) throw new Error("Valor precisa ser maior que zero.");
+  const descricao = input.descricao ? String(input.descricao).trim() : "Pedido personalizado";
+  const clienteId = input.clienteId ? String(input.clienteId) : null;
+
+  const cobranca = await criarCobrancaPix({
+    valor,
+    descricao,
+    referenciaExterna: `avulso-${randomUUID().slice(0, 12)}`,
+  });
+
+  const [row] = await db
+    .insert(cobrancasPix)
+    .values({
+      id: randomUUID(),
+      tipo: "personalizado",
+      clienteId,
+      itens: [],
+      descricao,
+      txid: cobranca.id,
+      valor,
+      status: "pending",
+      copiaECola: cobranca.copiaECola,
+      ticketUrl: cobranca.ticketUrl,
+    })
+    .returning();
+  return row;
+}
+
+/**
  * Chamado pelo webhook do Mercado Pago quando um Pix é confirmado. Marca a
- * cobrança como paga e reaproveita registrarPagamento() — a mesma lógica que
- * o botão manual "Registrar pagamento" já usa.
+ * cobrança como paga e empurra o vencimento de cada assinatura coberta
+ * (reaproveitando registrarPagamento() — mesma lógica do botão manual). Pra
+ * pedidos personalizados (itens vazio) só marca como pago; o próprio
+ * registro em cobrancasPix já entra no Histórico de pagamentos.
  */
 export async function confirmarCobrancaPix(txid: string) {
   const [cobranca] = await db.select().from(cobrancasPix).where(eq(cobrancasPix.txid, txid));
@@ -210,7 +315,9 @@ export async function confirmarCobrancaPix(txid: string) {
     .set({ status: "paid", pagoEm: new Date().toISOString() })
     .where(eq(cobrancasPix.id, cobranca.id));
 
-  await registrarPagamento({ assinaturaId: cobranca.assinaturaId, valor: cobranca.valor });
+  for (const item of cobranca.itens) {
+    await registrarPagamento({ assinaturaId: item.assinaturaId, valor: item.valor });
+  }
   return { ok: true as const, jaProcessada: false };
 }
 

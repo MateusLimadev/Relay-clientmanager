@@ -11,6 +11,16 @@ export function IconConfiguracoes({ size = 18, className }: IconProps) {
   );
 }
 
+export function IconPagamentos({ size = 18, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" className={className} {...base}>
+      <rect x="2.5" y="4.5" width="15" height="11" rx="1.8" />
+      <path d="M2.5 8.2h15" />
+      <path d="M5.5 12h3.5" />
+    </svg>
+  );
+}
+
 export function IconDashboard({ size = 18, className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" className={className} {...base}>

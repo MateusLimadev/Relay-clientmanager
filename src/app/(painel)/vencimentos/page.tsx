@@ -87,7 +87,12 @@ function Secao({
                     {g.itens.length > 1 && (
                       <div className="text-[14px] font-semibold text-text">Total {formatMoney(g.total)}</div>
                     )}
-                    <CobrarModal clienteNome={g.clienteNome} telefone={g.telefone} mensagemPadrao={mensagem} />
+                    <CobrarModal
+                      clienteNome={g.clienteNome}
+                      telefone={g.telefone}
+                      mensagemPadrao={mensagem}
+                      assinaturaIds={g.itens.map((a) => a.id)}
+                    />
                   </div>
                 </div>
 
@@ -110,6 +115,7 @@ function Secao({
                             mensagemPadrao={buildMensagemCobrancaGrupo(g.clienteNome, [
                               { servidor: a.servidorNome, login: a.login, vencimento: a.vencimento, valor: a.valorCliente },
                             ])}
+                            assinaturaIds={[a.id]}
                             compact
                           />
                           <RegistrarPagamentoModal

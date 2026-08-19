@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, numeric, date, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, numeric, date, integer, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
 
 export const servidores = pgTable("servidores", {
   id: uuid("id").primaryKey(),
@@ -54,17 +54,22 @@ export const settings = pgTable("settings", {
   cobrancaAutomaticaAtiva: boolean("cobranca_automatica_ativa").notNull().default(false),
 });
 
+/** Item coberto por uma cobrança Pix — guardado como snapshot pra saber o que empurrar quando pagar. */
+export type ItemCobrancaPix = { assinaturaId: string; servidorNome: string; login: string; valor: number };
+
 export const cobrancasPix = pgTable("cobrancas_pix", {
   id: uuid("id").primaryKey(),
-  assinaturaId: uuid("assinatura_id")
-    .notNull()
-    .references(() => assinaturas.id, { onDelete: "cascade" }),
+  tipo: text("tipo", { enum: ["assinatura", "personalizado"] }).notNull().default("assinatura"),
+  clienteId: uuid("cliente_id").references(() => clientes.id, { onDelete: "set null" }),
+  itens: jsonb("itens").$type<ItemCobrancaPix[]>().notNull().default([]),
+  descricao: text("descricao").notNull().default(""),
   txid: text("txid").notNull(),
   valor: numeric("valor", { precision: 10, scale: 2, mode: "number" }).notNull(),
   status: text("status", { enum: ["pending", "paid", "expired", "cancelled"] })
     .notNull()
     .default("pending"),
   copiaECola: text("copia_e_cola").notNull(),
+  ticketUrl: text("ticket_url"),
   criadoEm: timestamp("criado_em", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
   pagoEm: timestamp("pago_em", { withTimezone: true, mode: "string" }),
 });

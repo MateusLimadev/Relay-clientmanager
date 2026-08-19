@@ -53,6 +53,27 @@ export type PagamentoCliente = {
   login: string;
 };
 
+/** Linha unificada do Histórico de pagamentos — vem de `pagamentos` (por assinatura) ou de um pedido personalizado pago. */
+export type HistoricoPagamento = {
+  id: string;
+  data: string;
+  valor: number;
+  clienteNome: string;
+  origem: "assinatura" | "personalizado";
+  detalhe: string;
+};
+
+export type CobrancaPendente = {
+  id: string;
+  tipo: "assinatura" | "personalizado";
+  clienteNome: string;
+  descricao: string;
+  valor: number;
+  copiaECola: string;
+  ticketUrl: string | null;
+  criadoEm: string;
+};
+
 export type Vencimentos = {
   vencidas: Assinatura[];
   hoje: Assinatura[];

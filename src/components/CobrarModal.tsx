@@ -3,22 +3,42 @@
 import { useState } from "react";
 import { buildWhatsAppLink } from "@/lib/format";
 import { inputClass } from "@/components/ui";
+import { gerarCobrancaAssinaturasAction } from "@/app/(painel)/pagamentos/actions";
 
 export default function CobrarModal({
   clienteNome,
   telefone,
   mensagemPadrao,
+  assinaturaIds,
   compact = false,
 }: {
   clienteNome: string;
   telefone: string;
   mensagemPadrao: string;
+  assinaturaIds: string[];
   compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [mensagem, setMensagem] = useState(mensagemPadrao);
+  const [gerando, setGerando] = useState(false);
+  const [erroLink, setErroLink] = useState<string | null>(null);
+  const [linkGerado, setLinkGerado] = useState(false);
 
   const link = buildWhatsAppLink(telefone, mensagem);
+
+  async function handleGerarLink() {
+    setGerando(true);
+    setErroLink(null);
+    const resultado = await gerarCobrancaAssinaturasAction(assinaturaIds);
+    setGerando(false);
+    if (!resultado.ok) {
+      setErroLink(resultado.erro);
+      return;
+    }
+    const linkPagamento = resultado.ticketUrl ?? resultado.copiaECola;
+    setMensagem((atual) => `${atual}\n\nPague com Pix: ${linkPagamento}`);
+    setLinkGerado(true);
+  }
 
   return (
     <>
@@ -26,6 +46,8 @@ export default function CobrarModal({
         type="button"
         onClick={() => {
           setMensagem(mensagemPadrao);
+          setLinkGerado(false);
+          setErroLink(null);
           setOpen(true);
         }}
         className={
@@ -69,9 +91,21 @@ export default function CobrarModal({
             <textarea
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
-              rows={Math.min(12, mensagem.split("\n").length + 1)}
+              rows={Math.min(14, mensagem.split("\n").length + 1)}
               className={`${inputClass} resize-y font-mono text-[12.5px]`}
             />
+
+            <div className="mt-2.5">
+              <button
+                type="button"
+                onClick={handleGerarLink}
+                disabled={gerando || linkGerado}
+                className="cursor-pointer rounded-[10px] border border-border px-4 py-2 text-[13px] font-semibold text-text hover:bg-border-soft disabled:cursor-default disabled:opacity-60"
+              >
+                {gerando ? "Gerando cobrança Pix…" : linkGerado ? "Link Pix gerado ✓" : "Gerar link de pagamento Pix"}
+              </button>
+              {erroLink && <p className="mt-1.5 text-[12.5px] text-danger">{erroLink}</p>}
+            </div>
 
             <div className="mt-4 flex justify-end gap-2.5">
               <button

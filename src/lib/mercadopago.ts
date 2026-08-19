@@ -8,7 +8,7 @@ function getAccessToken() {
   return token;
 }
 
-export type CobrancaPix = { id: string; copiaECola: string };
+export type CobrancaPix = { id: string; copiaECola: string; ticketUrl: string | null };
 
 /**
  * Cria um pagamento Pix (API de Pagamentos, não Orders — só precisamos de
@@ -44,8 +44,9 @@ export async function criarCobrancaPix(params: {
 
   const copiaECola = json.point_of_interaction?.transaction_data?.qr_code;
   if (!copiaECola) throw new Error("Mercado Pago não retornou o código Pix copia-e-cola.");
+  const ticketUrl = json.point_of_interaction?.transaction_data?.ticket_url ?? null;
 
-  return { id: String(json.id), copiaECola };
+  return { id: String(json.id), copiaECola, ticketUrl };
 }
 
 export async function buscarPagamento(id: string): Promise<{ status: string }> {

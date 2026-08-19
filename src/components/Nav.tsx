@@ -14,6 +14,7 @@ import {
   IconClientes,
   IconServidores,
   IconConfiguracoes,
+  IconPagamentos,
   IconDots,
 } from "@/components/icons";
 
@@ -77,6 +78,17 @@ export default function Nav({ urgentCount }: { urgentCount: number }) {
           >
             <IconServidores size={18} />
             Servidores
+          </Link>
+          <Link
+            href="/pagamentos"
+            className="flex items-center gap-[11px] rounded-[9px] px-3 py-2.5 text-[14px] font-semibold"
+            style={{
+              background: isActive(pathname, "/pagamentos") ? "var(--accent-soft)" : "transparent",
+              color: isActive(pathname, "/pagamentos") ? "var(--accent)" : "var(--text-secondary)",
+            }}
+          >
+            <IconPagamentos size={18} />
+            Histórico de pagamentos
           </Link>
           <Link
             href="/configuracoes"
@@ -148,7 +160,9 @@ export default function Nav({ urgentCount }: { urgentCount: number }) {
           onClick={() => setMoreOpen(true)}
           style={{
             color:
-              isActive(pathname, "/servidores") || isActive(pathname, "/configuracoes")
+              isActive(pathname, "/servidores") ||
+              isActive(pathname, "/configuracoes") ||
+              isActive(pathname, "/pagamentos")
                 ? "var(--accent)"
                 : "var(--text-secondary)",
           }}
@@ -177,6 +191,14 @@ export default function Nav({ urgentCount }: { urgentCount: number }) {
             >
               <IconServidores size={19} />
               Servidores
+            </Link>
+            <Link
+              href="/pagamentos"
+              onClick={() => setMoreOpen(false)}
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[14.5px] font-semibold text-text"
+            >
+              <IconPagamentos size={19} />
+              Histórico de pagamentos
             </Link>
             <Link
               href="/configuracoes"
