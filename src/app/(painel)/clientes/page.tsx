@@ -77,7 +77,7 @@ export default async function ClientesPage({
                         {c.totalAssinaturas ?? 0}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                    <td className="px-4 py-3 text-right whitespace-nowrap [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                       <span className="ml-2.5">
                         <HistoricoModal clienteId={c.id} clienteNome={c.nome} />
                       </span>

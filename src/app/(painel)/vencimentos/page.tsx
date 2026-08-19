@@ -108,7 +108,7 @@ function Secao({
                       </div>
                       <div className="flex items-center gap-2.5">
                         <span className="font-semibold text-text">{formatMoney(a.valorCliente)}</span>
-                        <div className="flex items-center gap-2.5 md:opacity-0 md:transition-opacity md:group-hover/item:opacity-100 md:group-focus-within/item:opacity-100">
+                        <div className="flex items-center gap-2.5 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:transition-opacity [@media(hover:hover)]:group-hover/item:opacity-100 [@media(hover:hover)]:group-focus-within/item:opacity-100">
                           <CobrarModal
                             clienteNome={g.clienteNome}
                             telefone={g.telefone}

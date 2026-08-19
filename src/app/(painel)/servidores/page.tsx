@@ -47,7 +47,7 @@ export default async function ServidoresPage({
               <div className="mb-3.5 text-[12.5px] text-text-secondary">
                 {ativasPorServidor.get(s.id) ?? 0} assinaturas ativas
               </div>
-              <div className="flex gap-3.5 border-t border-border-soft pt-2.5 md:opacity-0 md:transition-opacity md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+              <div className="flex gap-3.5 border-t border-border-soft pt-2.5 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:transition-opacity [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100">
                 <Link
                   href={`/servidores/${s.id}/editar`}
                   className="cursor-pointer text-[13px] font-semibold text-text-secondary"

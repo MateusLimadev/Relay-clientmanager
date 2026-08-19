@@ -115,7 +115,7 @@ export default async function AssinaturasPage({
                         <StatusBadge status={a.status} />
                       </td>
                       <td className="px-4 py-3 text-right font-semibold text-text">{formatMoney(a.valorCliente)}</td>
-                      <td className="px-4 py-3 text-right whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                      <td className="px-4 py-3 text-right whitespace-nowrap [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                         {(a.status === "ativa" || a.status === "vencida") && (
                           <span className="ml-2.5">
                             <RegistrarPagamentoModal
