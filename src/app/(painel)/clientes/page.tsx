@@ -106,15 +106,34 @@ export default async function ClientesPage({
           {/* Cards — mobile */}
           <div className="flex flex-col gap-2.5 md:hidden">
             {clientes.map((c) => (
-              <Card key={c.id} className="flex items-center justify-between gap-2.5">
-                <div>
-                  <div className="text-[14.5px] font-bold text-text">{c.nome}</div>
-                  <div className="text-[12.5px] text-text-secondary">
-                    {c.telefone || "—"} · {c.totalAssinaturas ?? 0} assinatura(s)
+              <Card key={c.id} className="flex flex-col gap-2.5">
+                <div className="flex items-center justify-between gap-2.5">
+                  <div>
+                    <div className="text-[14.5px] font-bold text-text">{c.nome}</div>
+                    <div className="text-[12.5px] text-text-secondary">
+                      {c.telefone || "—"} · {c.totalAssinaturas ?? 0} assinatura(s)
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 rounded-[9px] bg-border-soft px-3 py-2">
+                    <HistoricoModal clienteId={c.id} clienteNome={c.nome} />
                   </div>
                 </div>
-                <div className="flex-shrink-0 rounded-[9px] bg-border-soft px-3 py-2">
-                  <HistoricoModal clienteId={c.id} clienteNome={c.nome} />
+                <div className="flex gap-3.5 border-t border-border-soft pt-2.5">
+                  <Link
+                    href={`/clientes/${c.id}/editar`}
+                    className="cursor-pointer text-[13px] font-semibold text-text-secondary"
+                  >
+                    Editar
+                  </Link>
+                  <form action={excluirCliente} className="inline">
+                    <input type="hidden" name="id" value={c.id} />
+                    <ConfirmButton
+                      confirmMessage={`Excluir o cliente "${c.nome}"?`}
+                      className="cursor-pointer text-[13px] font-semibold text-danger"
+                    >
+                      Excluir
+                    </ConfirmButton>
+                  </form>
                 </div>
               </Card>
             ))}
