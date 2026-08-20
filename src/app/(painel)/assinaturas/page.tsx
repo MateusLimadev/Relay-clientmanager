@@ -107,7 +107,10 @@ export default async function AssinaturasPage({
                   );
                   return (
                     <tr key={a.id} className="group border-t border-border-soft transition-colors hover:bg-border-soft/50">
-                      <td className="px-4 py-3 font-semibold text-text">{a.clienteNome}</td>
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-text">{a.clienteNome}</div>
+                        <div className="text-xs text-text-secondary">{telefonePorCliente.get(a.clienteId) || "—"}</div>
+                      </td>
                       <td className="px-4 py-3 text-text-secondary">{a.servidorNome}</td>
                       <td className="px-4 py-3 font-mono text-text-secondary">{a.login}</td>
                       <td className="px-4 py-3 text-text-value">{formatDate(a.vencimento)}</td>
@@ -189,7 +192,8 @@ export default async function AssinaturasPage({
                   <div className="flex items-start justify-between gap-2.5">
                     <div>
                       <div className="text-[14.5px] font-bold text-text">{a.clienteNome}</div>
-                      <div className="text-[12.5px] text-text-secondary">
+                      <div className="text-xs text-text-secondary">{telefonePorCliente.get(a.clienteId) || "—"}</div>
+                      <div className="mt-0.5 text-[12.5px] text-text-secondary">
                         {a.servidorNome} · login <span className="font-mono">{a.login}</span> · vence{" "}
                         {formatDate(a.vencimento)}
                       </div>
