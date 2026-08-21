@@ -200,9 +200,9 @@ export default async function AssinaturasPage({
                     </div>
                     <StatusBadge status={a.status} />
                   </div>
-                  <div className="mt-2.5 flex items-center justify-between border-t border-border-soft pt-2.5">
-                    <div className="text-[15px] font-bold text-text">{formatMoney(a.valorCliente)}</div>
-                    <div className="flex gap-3.5">
+                  <div className="mt-2.5 border-t border-border-soft pt-2.5">
+                    <div className="mb-2 text-[15px] font-bold text-text">{formatMoney(a.valorCliente)}</div>
+                    <div className="flex flex-wrap items-center gap-3.5">
                       {(a.status === "ativa" || a.status === "vencida") && (
                         <RegistrarPagamentoModal
                           assinaturaId={a.id}
@@ -223,6 +223,26 @@ export default async function AssinaturasPage({
                       <Link href={`/assinaturas/${a.id}/editar`} className="text-[13px] font-semibold text-text-secondary">
                         Editar
                       </Link>
+                      {a.status !== "cancelada" && (
+                        <form action={cancelarAssinaturaAction} className="inline">
+                          <input type="hidden" name="id" value={a.id} />
+                          <ConfirmButton
+                            confirmMessage={`Cancelar a assinatura de ${a.clienteNome}?`}
+                            className="text-[13px] font-semibold text-warning"
+                          >
+                            Cancelar
+                          </ConfirmButton>
+                        </form>
+                      )}
+                      <form action={excluirAssinaturaAction} className="inline">
+                        <input type="hidden" name="id" value={a.id} />
+                        <ConfirmButton
+                          confirmMessage={`Excluir definitivamente a assinatura de ${a.clienteNome}? Isso também apaga o histórico de pagamentos dela.`}
+                          className="text-[13px] font-semibold text-danger"
+                        >
+                          Excluir
+                        </ConfirmButton>
+                      </form>
                     </div>
                   </div>
                 </Card>
